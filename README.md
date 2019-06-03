@@ -3,6 +3,8 @@ This repository hosts the code related to the following paper:
 
 A. Furnari, G. M. Farinella, What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention. [Download](https://arxiv.org/pdf/1905.09035.pdf)
 
+If you use the code/models hosted in this repository, please cite the following paper:
+
 ```
 @article{furnari2019rulstm, 
   title = { What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention. }, 
