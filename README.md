@@ -11,7 +11,7 @@ A. Furnari, G. M. Farinella, What Would You Expect? Anticipating Egocentric Acti
   journal = { arXiv preprint arXiv:1905.09035 },
 }
 ```
-The code is not fully available yet. Please stay tuned, it will be released soon. More information at the project web page: [http://iplab.dmi.unict.it/rulstm/](http://iplab.dmi.unict.it/rulstm/)
+**The code is not fully available yet. Please stay tuned, it will be released soon. More information at the project web page: [http://iplab.dmi.unict.it/rulstm/](http://iplab.dmi.unict.it/rulstm/)**
 
 ## Faster-RCNN Model Trained on EPIC-Kitchens
 We release the Faster-RCNN object detector trained on EPIC-Kitchens that we used for our experiments. The detector has been trained using the [detectron](https://github.com/facebookresearch/Detectron) library. The `yaml` configuration file used to train the model is available in the `FasterRCNN` directory of this repository. The weights can be downloaded from [this link](http://iplab.dmi.unict.it/rulstm/downloads/ek18-2gpu-e2e-faster-rcnn-R-101-FPN_1x.pkl).
