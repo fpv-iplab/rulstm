@@ -33,3 +33,7 @@ A new file `path/to/video.mp4_detections.npy` will be created. The file will con
  * the fifth column contains the detection confidence scores;
  * columns 2-5 contain the coordinates of the detected bounding boxes in the format: `[xmin, ymin, xmax, ymax]`.
 Please refer to [https://github.com/epic-kitchens/annotations/blob/master/EPIC_noun_classes.csv](https://github.com/epic-kitchens/annotations/blob/master/EPIC_noun_classes.csv) for the list of object ids.
+
+## Related Works
+ * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf)
+ * More related works at: [http://iplab.dmi.unict.it/fpv/](http://iplab.dmi.unict.it/fpv/).
