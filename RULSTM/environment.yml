@@ -1,0 +1,46 @@
+name: rulstm
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - blas=1.0=mkl
+  - ca-certificates=2019.5.15=0
+  - certifi=2019.6.16=py37_1
+  - cffi=1.12.3=py37h2e261b9_0
+  - cudatoolkit=10.0.130=0
+  - cudnn=7.6.0=cuda10.0_0
+  - intel-openmp=2019.4=243
+  - libedit=3.1.20181209=hc058e9b_0
+  - libffi=3.2.1=hd88cf55_4
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libgfortran-ng=7.3.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - mkl=2019.4=243
+  - mkl_fft=1.0.12=py37ha843d7b_0
+  - mkl_random=1.0.2=py37hd81dba3_0
+  - ncurses=6.1=he6710b0_1
+  - ninja=1.9.0=py37hfd86e86_0
+  - numpy=1.16.4=py37h7e9f1db_0
+  - numpy-base=1.16.4=py37hde5b4d6_0
+  - openssl=1.1.1c=h7b6447c_1
+  - pip=19.1.1=py37_0
+  - pycparser=2.19=py37_0
+  - python=3.7.3=h0371630_0
+  - pytorch=1.0.1=cuda100py37he554f03_0
+  - readline=7.0=h7b6447c_5
+  - setuptools=41.0.1=py37_0
+  - sqlite=3.29.0=h7b6447c_0
+  - tk=8.6.8=hbc83047_0
+  - wheel=0.33.4=py37_0
+  - xz=5.2.4=h14c3975_4
+  - zlib=1.2.11=h7b6447c_3
+  - pip:
+    - lmdb==0.96
+    - pandas==0.25.0
+    - python-dateutil==2.8.0
+    - pytz==2019.2
+    - six==1.12.0
+    - torch==1.0.1
+    - tqdm==4.32.2
+prefix: /home/furnari/anaconda3/envs/rulstm
+
