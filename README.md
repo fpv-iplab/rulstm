@@ -15,6 +15,8 @@ If you use the code/models hosted in this repository, please cite the following 
   booktitle = { International Conference on Computer Vision (ICCV) },
 }
 ```
+## Updates:
+ * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`.
 ## Overview
 This repository provides the following components:
  * The official PyTorch implementation of the proposed Rolling-Unrolling LSTM approach, including Sequence-Completion Pre-Training and Modality ATTention (MATT);
@@ -67,6 +69,12 @@ We provide CSV for training/validation/and testing on EPIC-Kitchens in the `data
 We also provide pre-extracted features. The features are stored in LMDB datasets. To download them, run the following command:
 
 `./scripts/download_data.sh`
+
+Alternatively, you can download features extracted from each frame by using the script:
+
+`./scripts/download_data_full.sh`
+
+Please note that this download is significantly heavier and that it is not required to run the training with default parameters.
 
 This should populate three directories `data/rgb`, `data/flow`, `data/obj` with the LMDB datasets.
 
