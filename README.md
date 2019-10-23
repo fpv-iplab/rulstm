@@ -16,7 +16,8 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
- * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`.
+ * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
+ * **23/10/2019** Added some scripts to show how to extract features from videos. The scripts can be found under `FEATEXT` and are documented in this README. 
 ## Overview
 This repository provides the following components:
  * The official PyTorch implementation of the proposed Rolling-Unrolling LSTM approach, including Sequence-Completion Pre-Training and Modality ATTention (MATT);
@@ -151,6 +152,25 @@ A new file `path/to/video.mp4_detections.npy` will be created. The file will con
  * the fifth column contains the detection confidence scores;
  * columns 2-5 contain the coordinates of the detected bounding boxes in the format: `[xmin, ymin, xmax, ymax]`.
 Please refer to [https://github.com/epic-kitchens/annotations/blob/master/EPIC_noun_classes.csv](https://github.com/epic-kitchens/annotations/blob/master/EPIC_noun_classes.csv) for the list of object ids.
+
+## Feature Extraction
+A few example scripts showing how we performed feature extraction from video, can be found in the `FEATEXT` directory. 
+
+To extract features using the TSN models, it is necessary to install the `pretrainedmodels` package through `pip install pretrainedmodels`.
+
+To run the examples follow these steps:
+ * `cd FEATEXT`;
+ * `./scripts/download_models.sh`;
+ * Extract sample data with `tar xvf data.tar`. This will extract a few files in the `data` folder. These include:
+   * RGB frames. In general, these can be extracted using programs such as `ffmpeg`;
+   * Optical flows. These have been extracted using the TVL1 algorithm. Different programs can be used to extract the optical flow son GPU. For instance, https://github.com/feichtenhofer/gpu_flow;
+   * Object bounding boxes. These can be extracted using the Faster R-CNN model provided with this repository (see the `detect_video.py` script in `FasterRCNN/tools`;
+ * Create the destination directory for the features with `mkdir features`;
+ * Run the example scripts:
+   * `python extract_sample_rgb.py`;
+   * `python extract_sample_flow.py`;
+   * `python extract_sample_obj.py`;
+ * The scripts will create sample LMDB dbs in `features`;
 
 ## Related Works
  * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf);
