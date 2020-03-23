@@ -16,6 +16,7 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
+ * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See readme for more information;
  * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
  * **23/10/2019** Added some scripts to show how to extract features from videos. The scripts can be found under `FEATEXT` and are documented in this README. 
 ## Overview
@@ -171,6 +172,9 @@ To run the examples follow these steps:
    * `python extract_sample_flow.py`;
    * `python extract_sample_obj.py`;
  * The scripts will create sample LMDB dbs in `features`;
+ 
+## EGTEA Gaze+ Pre-Extracted Features
+We provide the EGTEA Gaze+ features used for the experiments (see paper for the details) at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). The features have been extracted using three different TSN models trained following the official splits proposed by the authors of EGTEA Gaze+ (see [http://cbs.ic.gatech.edu/fpv/](http://cbs.ic.gatech.edu/fpv/)).
 
 ## Related Works
  * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf);
