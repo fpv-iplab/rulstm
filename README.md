@@ -1,11 +1,22 @@
 # What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention
 This repository hosts the code related to the following paper:
 
+Antonino Furnari and Giovanni Maria Farinella, Rolling-Unrolling LSTMs for Action Anticipation from First-Person Video. IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI). 2020.
+
 Antonino Furnari and Giovanni Maria Farinella, What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention. International Conference on Computer Vision, 2019. [Download](https://arxiv.org/pdf/1905.09035.pdf)
 
 Please also see the project web page at [http://iplab.dmi.unict.it/rulstm](http://iplab.dmi.unict.it/rulstm).
 
 If you use the code/models hosted in this repository, please cite the following paper:
+
+```
+@article{furnari2020rulstm,
+  author = {Antonino Furnari and Giovanni Maria Farinella},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI)},
+  title = {Rolling-Unrolling LSTMs for Action Anticipation from First-Person Video},
+  year = {2020}
+}
+```
 
 ```
 @inproceedings{furnari2019rulstm, 
@@ -16,6 +27,7 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
+ * **04/05/2020** We have now published an extended version of this work on PAMI. Please check the text above for the updated references;
  * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See readme for more information;
  * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
  * **23/10/2019** Added some scripts to show how to extract features from videos. The scripts can be found under `FEATEXT` and are documented in this README. 
