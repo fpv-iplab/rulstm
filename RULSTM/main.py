@@ -6,7 +6,7 @@ from models import RULSTM, RULSTMFusion
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
-from utils import topk_accuracy, ValueMeter, topk_accuracy_multiple_timesteps, get_marginal_indexes, marginalize, softmax,  topk_recall_multiple_timesteps, tta, predictions_to_json
+from utils import topk_accuracy, ValueMeter, topk_accuracy_multiple_timesteps, get_marginal_indexes, marginalize, softmax,  topk_recall_multiple_timesteps, tta, predictions_to_json, MeanTopKRecallMeter
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -14,7 +14,7 @@ import json
 pd.options.display.float_format = '{:05.2f}'.format
 
 parser = ArgumentParser(description="Training program for RULSTM")
-parser.add_argument('mode', type=str, choices=['train', 'validate', 'test'], default='train',
+parser.add_argument('mode', type=str, choices=['train', 'validate', 'test', 'test', 'validate_json'], default='train',
                     help="Whether to perform training, validation or test.\
                             If test is selected, --json_directory must be used to provide\
                             a directory in which to save the generated jsons.")
@@ -44,6 +44,7 @@ parser.add_argument('--sequence_completion', action='store_true',
                     help='A flag to selec sequence completion pretraining rather than standard training.\
                             If not selected, a valid checkpoint for sequence completion pretraining\
                             should be available unless --ignore_checkpoints is specified')
+parser.add_argument('--mt5r', action='store_true')
 
 parser.add_argument('--num_class', type=int, default=2513,
                     help='Number of classes')
@@ -72,11 +73,14 @@ parser.add_argument('--ignore_checkpoints', action='store_true',
 parser.add_argument('--resume', action='store_true',
                     help='Whether to resume suspended training')
 
+parser.add_argument('--ek100', action='store_true',
+                    help="Whether to use EPIC-KITCHENS-100")
+
 parser.add_argument('--json_directory', type=str, default = None, help = 'Directory in which to save the generated jsons.')
 
 args = parser.parse_args()
 
-if args.mode == 'test':
+if args.mode == 'test' or args.mode=='validate_json':
     assert args.json_directory is not None
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -85,6 +89,9 @@ if args.task == 'anticipation':
     exp_name = f"RULSTM-{args.task}_{args.alpha}_{args.S_enc}_{args.S_ant}_{args.modality}"
 else:
     exp_name = f"RULSTM-{args.task}_{args.alpha}_{args.S_ant}_{args.modality}"
+
+if args.mt5r:
+    exp_name += '_mt5r'
 
 if args.sequence_completion:
     exp_name += '_sequence_completion'
@@ -223,7 +230,7 @@ def get_scores_early_recognition_fusion(models, loaders):
     return [verb_scores, noun_scores, action_scores] + list(outs[3:])
 
 
-def get_scores(model, loader):
+def get_scores(model, loader, challenge=False):
     model.eval()
     predictions = []
     labels = []
@@ -239,7 +246,7 @@ def get_scores(model, loader):
 
             y = batch['label'].numpy()
 
-            ids.append(batch['id'].numpy())
+            ids.append(batch['id'])
 
             preds = model(x).cpu().numpy()[:, -args.S_ant:, :]
 
@@ -264,7 +271,7 @@ def get_scores(model, loader):
         action_scores.shape[0], action_scores.shape[1], -1)
 
     
-    if labels.max()>0:
+    if labels.max()>0 and not challenge:
         return verb_scores, noun_scores, action_scores, labels[:, 0], labels[:, 1], labels[:, 2]
     else:
         return verb_scores, noun_scores, action_scores, ids
@@ -276,7 +283,10 @@ def trainval(model, loaders, optimizer, epochs, start_epoch, start_best_perf):
     for epoch in range(start_epoch, epochs):
         # define training and validation meters
         loss_meter = {'training': ValueMeter(), 'validation': ValueMeter()}
-        accuracy_meter = {'training': ValueMeter(), 'validation': ValueMeter()}
+        if args.mt5r:
+            accuracy_meter = {'training': MeanTopKRecallMeter(args.num_class), 'validation': MeanTopKRecallMeter(args.num_class)}
+        else:
+            accuracy_meter = {'training': ValueMeter(), 'validation': ValueMeter()}
         for mode in ['training', 'validation']:
             # enable gradients only if training
             with torch.set_grad_enabled(mode == 'training'):
@@ -321,7 +331,11 @@ def trainval(model, loaders, optimizer, epochs, start_epoch, start_best_perf):
 
                     # store the values in the meters to keep incremental averages
                     loss_meter[mode].add(loss.item(), bs)
-                    accuracy_meter[mode].add(acc, bs)
+                    if args.mt5r:
+                        accuracy_meter[mode].add(preds[:, idx, :].detach().cpu().numpy(),
+                                                 y.detach().cpu().numpy())
+                    else:
+                        accuracy_meter[mode].add(acc, bs)
 
                     # if in training mode
                     if mode == 'training':
@@ -460,9 +474,27 @@ def main():
 
             print(
                 f"\nMean TtA(5): VERB: {tta_verb:0.2f} NOUN: {tta_noun:0.2f} ACTION: {tta_action:0.2f}")
-    
-    elif args.mode == 'test':
-        for m in ['seen','unseen']:
+    elif args.mode == 'validate':
+        if args.task == 'early_recognition' and args.modality == 'fusion':
+            loaders = [get_loader('validation', 'rgb'), get_loader('validation', 'flow'),
+                       get_loader('validation', 'obj')]
+            verb_scores, noun_scores, action_scores, verb_labels, noun_labels, action_labels = get_scores_early_recognition_fusion(
+                model, loaders)
+        else:
+            epoch, perf, _ = load_checkpoint(model, best=True)
+            print(
+                f"Loaded checkpoint for model {type(model)}. Epoch: {epoch}. Perf: {perf:0.2f}.")
+
+            loader = get_loader('validation')
+
+            verb_scores, noun_scores, action_scores, verb_labels, noun_labels, action_labels = get_scores(model,
+                                                                                                              loader)
+    elif 'test' in args.mode:
+        if args.ek100:
+            mm = ['timestamps']
+        else:
+            mm = ['seen', 'unseen']
+        for m in mm:
             if args.task == 'early_recognition' and args.modality == 'fusion':
                 loaders = [get_loader(f"test_{m}", 'rgb'), get_loader(f"test_{m}", 'flow'), get_loader(f"test_{m}", 'obj')]
                 discarded_ids = loaders[0].dataset.discarded_ids
@@ -483,16 +515,51 @@ def main():
             verb_scores = np.concatenate((verb_scores, np.zeros((len(discarded_ids), *verb_scores.shape[1:])))) [:,idx,:]
             noun_scores = np.concatenate((noun_scores, np.zeros((len(discarded_ids), *noun_scores.shape[1:])))) [:,idx,:]
             action_scores = np.concatenate((action_scores, np.zeros((len(discarded_ids), *action_scores.shape[1:])))) [:,idx,:]
-            
+
             actions = pd.read_csv(join(args.path_to_data, 'actions.csv'))
             # map actions to (verb, noun) pairs
             a_to_vn = {a[1]['id']: tuple(a[1][['verb', 'noun']].values)
                        for a in actions.iterrows()}
 
-            preds = predictions_to_json(verb_scores, noun_scores, action_scores, ids, a_to_vn)
+            preds = predictions_to_json(verb_scores, noun_scores, action_scores, ids, a_to_vn, version = '0.2' if args.ek100 else '0.1', sls=True)
 
-            with open(join(args.json_directory,exp_name+f"_{m}.json"), 'w') as f:
-                f.write(json.dumps(preds, indent=4, separators=(',',': ')))
+            if args.ek100:
+                with open(join(args.json_directory,exp_name+f"_test.json"), 'w') as f:
+                    f.write(json.dumps(preds, indent=4, separators=(',',': ')))
+            else:
+                with open(join(args.json_directory,exp_name+f"_{m}.json"), 'w') as f:
+                    f.write(json.dumps(preds, indent=4, separators=(',',': ')))
+    elif 'validate_json' in args.mode:
+        if args.task == 'early_recognition' and args.modality == 'fusion':
+            loaders = [get_loader("validation", 'rgb'), get_loader("validation", 'flow'), get_loader("validation", 'obj')]
+            discarded_ids = loaders[0].dataset.discarded_ids
+            verb_scores, noun_scores, action_scores, ids = get_scores_early_recognition_fusion(model, loaders)
+        else:
+            loader = get_loader("validation")
+            epoch, perf, _ = load_checkpoint(model, best=True)
+
+            discarded_ids = loader.dataset.discarded_ids
+
+            print(
+                f"Loaded checkpoint for model {type(model)}. Epoch: {epoch}. Perf: {perf:0.2f}.")
+
+            verb_scores, noun_scores, action_scores, ids = get_scores(model, loader, challenge=True)
+
+        idx = -4 if args.task == 'anticipation' else -1
+        ids = list(ids) + list(discarded_ids)
+        verb_scores = np.concatenate((verb_scores, np.zeros((len(discarded_ids), *verb_scores.shape[1:])))) [:,idx,:]
+        noun_scores = np.concatenate((noun_scores, np.zeros((len(discarded_ids), *noun_scores.shape[1:])))) [:,idx,:]
+        action_scores = np.concatenate((action_scores, np.zeros((len(discarded_ids), *action_scores.shape[1:])))) [:,idx,:]
+
+        actions = pd.read_csv(join(args.path_to_data, 'actions.csv'))
+        # map actions to (verb, noun) pairs
+        a_to_vn = {a[1]['id']: tuple(a[1][['verb', 'noun']].values)
+                   for a in actions.iterrows()}
+
+        preds = predictions_to_json(verb_scores, noun_scores, action_scores, ids, a_to_vn, version = '0.2' if args.ek100 else '0.1', sls=True)
+
+        with open(join(args.json_directory,exp_name+f"_validation.json"), 'w') as f:
+            f.write(json.dumps(preds, indent=4, separators=(',',': ')))
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,5 @@
 # What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention
-This repository hosts the code related to the following paper:
+This repository hosts the code related to the following papers:
 
 Antonino Furnari and Giovanni Maria Farinella, Rolling-Unrolling LSTMs for Action Anticipation from First-Person Video. IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI). 2020. [Download](http://arxiv.org/pdf/2005.02190.pdf)
 
@@ -7,7 +7,7 @@ Antonino Furnari and Giovanni Maria Farinella, What Would You Expect? Anticipati
 
 Please also see the project web page at [http://iplab.dmi.unict.it/rulstm](http://iplab.dmi.unict.it/rulstm).
 
-If you use the code/models hosted in this repository, please cite the following paper:
+If you use the code/models hosted in this repository, please cite the following papers:
 
 ```
 @article{furnari2020rulstm,
@@ -27,27 +27,29 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
+ * **30/09/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
  * **04/05/2020** We have now published an extended version of this work on PAMI. Please check the text above for the updated references;
  * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See readme for more information;
  * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
  * **23/10/2019** Added some scripts to show how to extract features from videos. The scripts can be found under `FEATEXT` and are documented in this README. 
+
 ## Overview
 This repository provides the following components:
  * The official PyTorch implementation of the proposed Rolling-Unrolling LSTM approach, including Sequence-Completion Pre-Training and Modality ATTention (MATT);
- * A program to train, validate and test the proposed method on the EPIC-Kitchens dataset;
- * Pre-extracted features for a subset of frames of EPIC-Kitchens. Specifically, we include:
+ * A program to train, validate and test the proposed method on the EPIC-KITCHENS-55 and EPIC-KITCHENS-100 datasets;
+ * Pre-extracted features for EPIC-KITCHENS-55 and EPIC-KITCHENS-100. Specifically, we include:
    * RGB features: extracted from RGB iamges using a BNInception CNN trained for the task of *egocentric action recognition* using [Temporal Segment Networks](https://github.com/yjxiong/tsn-pytorch);
    * Flow features: similar to RGB features, but extracted with a BNInception CNN trained on optical flow;
-   * OBJ features: object-based features obtained by running a Faster R-CNN object detector trained on EPIC-Kitchens;
+   * OBJ features: object-based features obtained by running a Faster R-CNN object detector trained on EPIC-KITCHENS-55;
  * The checkpoints of the RGB/Flow/OBJ/Fusion models trained for both tasks: egocentric action anticipation and early action recognition;
  * The checkpoints of the TSN models (to be used with the [official PyTorch implementation of TSN](https://github.com/yjxiong/tsn-pytorch));
- * The checkpoint of the Faster R-CNN object detector trained on EPIC-Kitchens;
+ * The checkpoint of the Faster R-CNN object detector trained on EPIC-KITCHENS-55;
  * The training/validation split used for the experiments. Note that the TSN and Faster R-CNN models have been trained on the training set of this split.
 
 Please, refer to the paper for more technical details. The following sections document the released material.
 
-## RU-LSTM Implementation and main training/validaiton/test program
-The provided implementation and training/validation/test program can be found in the `RULSTM` directory. In order to proceed to training, it is necessary to retrieve the pre-extracted features from our website. To save space and bandwidth, we provide features extracted only on the subset of frames used for the experiments (we sampled frames at about 4fps - please see the paper). These features are sufficient to train/validate/test the methods on the whole EPIC-Kitchens dataset following the settings reported in the paper.
+## RU-LSTM Implementation and main training/validation/test program
+The provided implementation and training/validation/test program can be found in the `RULSTM` directory. In order to proceed to training, it is necessary to retrieve the pre-extracted features from our website. To save space and bandwidth, we provide features extracted only on the subset of frames used for the experiments (we sampled frames at about 4fps - please see the paper). These features are sufficient to train/validate/test the methods on the whole EPIC-KITCHENS-55 dataset following the settings reported in the paper.
 
 ### Requirements
 To run the code, you will need a Python3 interpreter and some libraries (including PyTorch). 
@@ -67,9 +69,9 @@ If you are not using Anaconda, we provide a list of libraries in `requirements.t
 `pip install -r requirements.txt`
 
 ### Dataset, training/validaiton splits, and features
-We provide CSV for training/validation/and testing on EPIC-Kitchens in the `data` directory. A brief description of each csv follows:
+We provide CSVs for training/validation/and testing on EPIC-KITCHENS-55 in the `data/ek55` directory. A brief description of each csv follows:
  * `actions.csv`: maps action ids to (verb,noun) pairs;
- * `EPIC_many_shot_nouns.csv`: contains the list of many shot nouns for class-aware metrics (please refer to [the EPIC-Kitchens paper](https://arxiv.org/abs/1804.02748) for more details);
+ * `EPIC_many_shot_nouns.csv`: contains the list of many shot nouns for class-aware metrics (please refer to [the EPIC-KITCHENS-55 paper](https://arxiv.org/abs/1804.02748) for more details);
  * `EPIC_many_shot_verbs.csv`: similar to the previous one, but related to verbs;
  * `test_seen.csv`: contains the timestamps (expressed in number of frames) of the "seen" test set (S1);
  * `test_unseen.csv`: contains the timestamps (expressed in number of frames) of the "unseen" test set (S2);
@@ -77,29 +79,37 @@ We provide CSV for training/validation/and testing on EPIC-Kitchens in the `data
  * `validation.csv`: contains annotations for the validation set in our training/validation split;
  * `training_videos.csv`: contains the list of training videos in our training/validation split;
  * `validation_videos.csv`: contains the list of validation videos in our training/validation split;
+We also provide CSVs for training/validation/testing on EPIC-KITCHENS-100 in the `data/ek100` directory. 
 
- Please note that time-stamps are reported in terms of frame numbers in the csvs. This has been done by assuming a fixed framerate of 30fps. Since the original videos have been collected a different framerates, we first converted all videos to 30fps using ffmpeg.
+Please note that time-stamps are reported in terms of frame numbers in the csvs. This has been done by assuming a fixed framerate of 30fps. Since the original videos have been collected a different framerates, we first converted all videos to 30fps using ffmpeg.
 
-We also provide pre-extracted features. The features are stored in LMDB datasets. To download them, run the following command:
+We provide pre-extracted features. The features are stored in LMDB datasets. To download them, run the following commands:
 
-`./scripts/download_data.sh`
+ * EPIC-KITCHENS-55: `./scripts/download_data_ek55.sh`;
 
 Alternatively, you can download features extracted from each frame by using the script:
 
-`./scripts/download_data_full.sh`
+ * EPIC-KITCHENS-55: `./scripts/download_data_ek55_full.sh`;
+ * EPIC-KITCHENS-100: `./scripts/download_data_ek100_full.sh`;
 
-Please note that this download is significantly heavier and that it is not required to run the training with default parameters.
+Please note that this download is significantly heavier and that it is not required to run the training with default parameters on EPIC-KITCHENS-55.
 
-This should populate three directories `data/rgb`, `data/flow`, `data/obj` with the LMDB datasets.
+This should populate three directories `data/ek{55|100}/rgb`, `data/ek{55|100}/flow`, `data/ek{55|100}/obj` with the LMDB datasets.
 
 ### Trainining
 Models can be trained using the `main.py` program. For instance, to train the RGB branch for the action anticipation task, use the following commands:
 
- * `mkdir models`
- * `python main.py train data models --modality rgb --task anticipation --sequence_completion`
- * `python main.py train data models --modality rgb --task anticipation`
+#### EPIC-KITCHENS-55
+ * `mkdir models/`
+ * `python main.py train data/ek55 models/ek55 --modality rgb --task anticipation --sequence_completion`
+ * `python main.py train data/ek55 models/ek55 --modality rgb --task anticipation`
 
-This will first pre-train using sequence completion, then fine-tune to the main anticipation task. All models will be stored in the `models` directory.
+#### EPIC-KITCHENS-100
+ * `mkdir models/`
+ * `python main.py train data/ek100 models/ek100 --modality rgb --task anticipation --sequence_completion --num_class 3806 --mt5r`
+ * `python main.py train data/ek100 models/ek100 --modality rgb --task anticipation --num_class 3806 --mt5r`
+
+This will first pre-train using sequence completion, then fine-tune to the main anticipation task. All models will be stored in the `models/ek{55|100}` directory.
 
 Optionally, a `--visdom` flag can be passed to the training program in order to enable loggin using visdom. To allow this, it is necessary to install visdom with:
 
@@ -110,45 +120,89 @@ And run it with:
 `python -m visdom.server`
 
 Similar commands can be used to train all models. The following scripts contain all commands required to train the models for egocentric action anticipation and early action recognition:
- * `scripts/train_anticipation.sh`;
- * `scripts/train_recognition.sh`.
+ * `scripts/train_anticipation_ek{55|100}.sh`;
+ * `scripts/train_recognition_ek55.sh`.
 
 ### Validation
 The anticipation models can be validated using the following commands:
- * RGB branch: `python main.py validate data models --modality rgb --task anticipation`;
- * Optical Flow branch: `python main.py validate data models --modality flow --task anticipation`;
- * Object branch: `python main.py validate data models --modality obj --task anticipation --feat_in 352`;
- * Complete architecture with MATT: `python main.py validate data models --modality fusion --task anticipation`.
 
+#### Action Anticipation
+
+##### EPIC-KITCHENS-55
+ * RGB branch: `python main.py validate data/ek55 models/ek55 --modality rgb --task anticipation`;
+ * Optical Flow branch: `python main.py validate data/ek55 models/ek55 --modality flow --task anticipation`;
+ * Object branch: `python main.py validate data/ek55 models/ek55 --modality obj --task anticipation --feat_in 352`;
+ * Complete architecture with MATT: `python main.py validate data/ek55 models/ek55 --modality fusion --task anticipation`.
+
+##### EPIC-KITCHENS-100
+ * RGB branch: `python main.py validate data/ek100 models/ek100 --modality rgb --task anticipation --num_class 3806 --mt5r`;
+ * Optical Flow branch: `python main.py validate data/ek100 models/ek100 --modality flow --task anticipation --num_class 3806 --mt5r`;
+ * Object branch: `python main.py validate data/ek100 models/ek100 --modality obj --task anticipation --feat_in 352 --num_class 3806 --mt5r`;
+ * Complete architecture with MATT: `python main.py validate data/ek100 models/ek100 --modality fusion --task anticipation --num_class 3806 --mt5r`.
+
+###### Validation Jsons
+You can produce validation jsons as follows:
+
+ * `mkdir -p jsons/ek100`;
+ * Anticipation: `python main.py validate_json data/ek100 models/ek100 --modality fusion --task anticipation --json_directory jsons/ek100 --ek100 --num_class 3806 --mt5r`;
+ * Early recognition: `python main.py validate_json data/ek100 models/ek100 --modality fusion --task early_recognition --json_directory jsons/ek100 -ek100 --num_class 3806 --mt5r`.
+
+#### Early Action Recognition
 Similarly, for early action recognition:
-* RGB branch: `python main.py validate data models --modality rgb --task early_recognition`;
+
+#### EPIC-KITCHENS-55
+ * RGB branch: `python main.py validate data models --modality rgb --task early_recognition`;
  * Optical Flow branch: `python main.py validate data models --modality flow --task early_recognition`;
  * Object branch: `python main.py validate data models --modality obj --task early_recognition --feat_in 352`;
  * Late fusion model: `python main.py validate data models --modality fusion --task early_recognition`.
 
- ### Test
- The `main.py` program also allows to run the models on the EPIC-Kitchens test sets and produce jsons to be sent to the leaderboard (see [http://epic-kitchens.github.io/](http://epic-kitchens.github.io/)). To test models, you can use the following commands:
+### Test
+ The `main.py` program also allows to run the models on the EPIC-KITCHENS-55 and EPIC-KITCHENS-100 test sets and produce jsons to be sent to the leaderboard (see [http://epic-kitchens.github.io/](http://epic-kitchens.github.io/)). To test models, you can use the following commands:
 
-  * `mkdir jsons`;
-  * Anticipation: `python main.py test data models --modality fusion --task anticipation --json_directory jsons`;
-  * Early recognition: `python main.py test data models --modality fusion --task early_recognition --json_directory jsons`.
+#### EPIC-KITCHENS-55
+ * `mkdir -p jsons/ek55`;
+ * Anticipation: `python main.py test data/ek55 models/ek55 --modality fusion --task anticipation --json_directory jsons/ek55`;
+ * Early recognition: `python main.py test data/ek55 models/ek55 --modality fusion --task early_recognition --json_directory jsons/ek55`.
 
-### ICCV Models
-We also provide the official checkpoints used to report the results in our ICCV paper. These can be downloaded using the script:
+#### EPIC-KITCHENS-100
+ * `mkdir -p jsons/ek100`;
+ * Anticipation: `python main.py test data/ek100 models/ek100 --modality fusion --task anticipation --json_directory jsons/ek100 --ek100 --num_class 3806 --mt5r`;
+ * Early recognition: `python main.py test data/ek100 models/ek100 --modality fusion --task early_recognition --json_directory jsons/ek100 -ek100 --num_class 3806 --mt5r`.
 
-`./script/download_models.sh`
+### Pretrained Models
 
-The models will be downloaded in `iccv_models`. You can test the model and obtain the results reported in the paper using the same `main.py` program. For instance:
+#### EPIC-KITCHENS-55
+We provide the official checkpoints used to report the results on EPIC-KITCHENS-55 in our ICCV paper. These can be downloaded using the script:
 
-`python main.py test data iccv_models --modality fusion --task anticipation --json_directory jsons`
+`./script/download_models_ek55.sh`
+
+The models will be downloaded in `models/ek55`. You can test the model and obtain the results reported in the paper using the same `main.py` program. For instance:
+
+`python main.py test data/ek55 models/ek55 --modality fusion --task anticipation --json_directory jsons`
+
+#### EPIC-KITCHENS-100
+We provide the checkpoints used to report the results in the EPIC-KITCHENS-100 paper (https://arxiv.org/abs/2006.13256). These can be downloaded using the script:
+
+`./script/download_models_ek100.sh`
+
+The models will be downloaded in `models/ek100`. You can produce the validation and test jsons replicating the results of the paper as follows:
+
+ * `python main.py test data/ek100 models/ek100 --modality fusion --task anticipation --json_directory jsons --ek100 --mt5r`
+ * `python main.py validate_json data/ek100 models/ek100 --modality fusion --task anticipation --json_directory jsons --ek100 --mt5r`
 
 ## TSN models
 Can be downloaded from the following URLs:
- * RGB: `http://iplab.dmi.unict.it/rulstm/downloads/TSN-rgb.pth.tar`;
- * Flow: `http://iplab.dmi.unict.it/rulstm/downloads/TSN-flow.pth.tar`.
 
-## Faster-RCNN Model Trained on EPIC-Kitchens
-We release the Faster-RCNN object detector trained on EPIC-Kitchens that we used for our experiments. The detector has been trained using the [detectron](https://github.com/facebookresearch/Detectron) library. The `yaml` configuration file used to train the model is available in the `FasterRCNN` directory of this repository. The weights can be downloaded from [this link](http://iplab.dmi.unict.it/rulstm/downloads/ek18-2gpu-e2e-faster-rcnn-R-101-FPN_1x.pkl).
+### EPIC-KITCHENS-55
+ * RGB: `http://iplab.dmi.unict.it/sharing/rulstm/TSN-rgb.pth.tar`;
+ * Flow: `http://iplab.dmi.unict.it/sharing/rulstm/TSN-flow.pth.tar`.
+ 
+### EPIC-KITCHENS-100
+ * RGB: `http://iplab.dmi.unict.it/sharing/rulstm/TSN-rgb-ek100.pth.tar`;
+ * Flow: `http://iplab.dmi.unict.it/sharing/rulstm/TSN-flow-ek100.pth.tar`.
+
+## Faster-RCNN Model Trained on EPIC-KITCHENS-55
+We release the Faster-RCNN object detector trained on EPIC-KITCHENS-55 that we used for our experiments. The detector has been trained using the [detectron](https://github.com/facebookresearch/Detectron) library. The `yaml` configuration file used to train the model is available in the `FasterRCNN` directory of this repository. The weights can be downloaded from [this link](http://iplab.dmi.unict.it/rulstm/downloads/ek18-2gpu-e2e-faster-rcnn-R-101-FPN_1x.pkl).
 
 ### Usage
 Make sure the detectron library is installed and available in the system path. A good idea might be to use a docker container. Please refer to [https://github.com/facebookresearch/Detectron/blob/master/INSTALL.md](https://github.com/facebookresearch/Detectron/blob/master/INSTALL.md) for more details.

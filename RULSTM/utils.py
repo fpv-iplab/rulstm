@@ -2,6 +2,28 @@
 import numpy as np
 
 
+class MeanTopKRecallMeter(object):
+    def __init__(self, num_classes, k=5):
+        self.num_classes = num_classes
+        self.k = k
+        self.reset()
+
+    def reset(self):
+        self.tps = np.zeros(self.num_classes)
+        self.nums = np.zeros(self.num_classes)
+
+    def add(self, scores, labels):
+        tp = (np.argsort(scores, axis=1)[:, -self.k:] == labels.reshape(-1, 1)).max(1)
+        for l in np.unique(labels):
+            self.tps[l]+=tp[labels==l].sum()
+            self.nums[l]+=(labels==l).sum()
+
+    def value(self):
+        recalls = (self.tps/self.nums)[self.nums>0]
+        if len(recalls)>0:
+            return recalls.mean()*100
+        else:
+            return None
 class ValueMeter(object):
     def __init__(self):
         self.sum = 0
@@ -127,10 +149,16 @@ def tta(scores, labels):
     return np.nanmean(time_stamps[np.argmax(cum_comparisons, 1)], 0)[4]
 
 
-def predictions_to_json(verb_scores, noun_scores, action_scores, action_ids, a_to_vn, top_actions=100):
+def predictions_to_json(verb_scores, noun_scores, action_scores, action_ids, a_to_vn, top_actions=100, version='0.1', sls=None):
     """Save verb, noun and action predictions to json for submitting them to the EPIC-Kitchens leaderboard"""
-    predictions = {'version': '0.1',
+    predictions = {'version': version,
                    'challenge': 'action_anticipation', 'results': {}}
+
+    if sls is not None:
+        predictions['sls_pt'] = 1
+        predictions['sls_tl'] = 4
+        predictions['sls_td'] = 3
+
 
     row_idxs = np.argsort(action_scores)[:, ::-1]
     top_100_idxs = row_idxs[:, :top_actions]
