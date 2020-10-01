@@ -27,7 +27,7 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
- * **30/09/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
+ * **01/10/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
  * **04/05/2020** We have now published an extended version of this work on PAMI. Please check the text above for the updated references;
  * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See readme for more information;
  * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
