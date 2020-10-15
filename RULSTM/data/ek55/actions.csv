@@ -99,7 +99,7 @@ id,action,verb,noun
 97, take_bag:cereal,0,20
 98, take_paella,0,201
 99, get_opener:can,0,203
-100, take_t,0,204
+100, take_shirt,0,204
 101, pick-up_sandwich,0,206
 102, pick-up_burger,0,207
 103, grab_pancake,0,208
@@ -1360,7 +1360,7 @@ id,action,verb,noun
 1358, flip_sausage,32,84
 1359, hang_clothes,33,130
 1360, hang_pot,33,15
-1361, hang_t,33,204
+1361, hang_shirt,33,204
 1362, hang_sock,33,212
 1363, hang-up_spatula,33,22
 1364, hang-up_mug,33,23
