@@ -135,10 +135,12 @@ The anticipation models can be validated using the following commands:
  * Complete architecture with MATT: `python main.py validate data/ek55 models/ek55 --modality fusion --task anticipation`.
 
 ##### EPIC-KITCHENS-100
- * RGB branch: `python main.py validate data/ek100 models/ek100 --modality rgb --task anticipation --num_class 3806 --mt5r`;
- * Optical Flow branch: `python main.py validate data/ek100 models/ek100 --modality flow --task anticipation --num_class 3806 --mt5r`;
- * Object branch: `python main.py validate data/ek100 models/ek100 --modality obj --task anticipation --feat_in 352 --num_class 3806 --mt5r`;
- * Complete architecture with MATT: `python main.py validate data/ek100 models/ek100 --modality fusion --task anticipation --num_class 3806 --mt5r`.
+ * RGB branch: `python main.py validate data/ek100 models/ek100 --modality rgb --task anticipation --num_class 3806 --mt5r -ek100`;
+ * Optical Flow branch: `python main.py validate data/ek100 models/ek100 --modality flow --task anticipation --num_class 3806 --mt5r -ek100`;
+ * Object branch: `python main.py validate data/ek100 models/ek100 --modality obj --task anticipation --feat_in 352 --num_class 3806 --mt5r -ek100`;
+ * Complete architecture with MATT: `python main.py validate data/ek100 models/ek100 --modality fusion --task anticipation --num_class 3806 --mt5r -ek100`.
+
+These instructions will evaluate the models using the official measures of the EPIC-KITCHENS-100 dataset for the action anticipation challenge.
 
 ###### Validation Jsons
 You can produce validation jsons as follows:

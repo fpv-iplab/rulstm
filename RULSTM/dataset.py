@@ -86,6 +86,7 @@ class SequenceDataset(data.Dataset):
         # initialize some lists
         self.ids = [] # action ids
         self.discarded_ids = [] # list of ids discarded (e.g., if there were no enough frames before the beginning of the action
+        self.discarded_labels = [] # list of labels discarded (e.g., if there were no enough frames before the beginning of the action
         self.past_frames = [] # names of frames sampled before each action
         self.action_frames = [] # names of frames sampled from each action
         self.labels = [] # labels of each action
@@ -138,6 +139,17 @@ class SequenceDataset(data.Dataset):
             else:
                 #if the sequence is invalid, do nothing, but add the id to the discarded_ids list
                 self.discarded_ids.append(a.name)
+                if isinstance(self.label_type, list):
+                    if self.challenge: # if sampling for the challenge, there are no labels, just add -1
+                        self.discarded_labels.append(-1)
+                    else:
+                        # otherwise get the required labels
+                        self.discarded_labels.append(a[self.label_type].values.astype(int))
+                else: #single label version
+                    if self.challenge:
+                        self.discarded_labels.append(-1)
+                    else:
+                        self.discarded_labels.append(a[self.label_type])
 
     def __sample_frames_past(self, point):
         """Samples frames before the beginning of the action "point" """
