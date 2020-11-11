@@ -242,7 +242,7 @@ To run the examples follow these steps:
  * The scripts will create sample LMDB dbs in `features`;
  
 ## EGTEA Gaze+ Pre-Extracted Features
-We provide the EGTEA Gaze+ features used for the experiments (see paper for the details) at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). The features have been extracted using three different TSN models trained following the official splits proposed by the authors of EGTEA Gaze+ (see [http://cbs.ic.gatech.edu/fpv/](http://cbs.ic.gatech.edu/fpv/)).
+We provide the EGTEA Gaze+ features used for the experiments (see paper for the details) at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). The features have been extracted using three different TSN models trained following the official splits proposed by the authors of EGTEA Gaze+ (see [http://cbs.ic.gatech.edu/fpv/](http://cbs.ic.gatech.edu/fpv/)). The annotations formatted in a way to be directly usable with this repository can be found in `RULSTM/data/egtea`.
 
 ## Related Works
  * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf);
