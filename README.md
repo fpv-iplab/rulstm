@@ -27,9 +27,10 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
+ * **11/01/2020** We have updated the archive providing the EGTEA Gaze+ pre-extracted features. Please see this README (below) for more information;
  * **01/10/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
  * **04/05/2020** We have now published an extended version of this work on PAMI. Please check the text above for the updated references;
- * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See readme for more information;
+ * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See README for more information;
  * **11/10/2019** We are now also providing TSN and object-based features extracted for **each frame of EPIC-KITCHENS**. They can be downloaded using the `download_data_full.sh` script rather than `download_data.sh`;
  * **23/10/2019** Added some scripts to show how to extract features from videos. The scripts can be found under `FEATEXT` and are documented in this README. 
 
@@ -243,6 +244,26 @@ To run the examples follow these steps:
  
 ## EGTEA Gaze+ Pre-Extracted Features
 We provide the EGTEA Gaze+ features used for the experiments (see paper for the details) at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). The features have been extracted using three different TSN models trained following the official splits proposed by the authors of EGTEA Gaze+ (see [http://cbs.ic.gatech.edu/fpv/](http://cbs.ic.gatech.edu/fpv/)). The annotations formatted in a way to be directly usable with this repository can be found in `RULSTM/data/egtea`.
+
+**Note**: a previous version of the zip file contained the following LMDB databases:
+ * `TSN-C_3_egtea_action_CE_flow_model_best_fcfull_hd`;
+ * `TSN-C_3_egtea_action_CE_rgb_model_best_fcfull_hd`;   
+ * `TSN-C_3_egtea_action_CE_s1_rgb_model_best_fcfull_hd`;
+ * `TSN-C_3_egtea_action_CE_s1_flow_model_best_fcfull_hd`; 
+ * `TSN-C_3_egtea_action_CE_s2_rgb_model_best_fcfull_hd`;
+ * `TSN-C_3_egtea_action_CE_s2_flow_model_best_fcfull_hd`;
+ * `TSN-C_3_egtea_action_CE_s3_rgb_model_best_fcfull_hd`;
+ * `TSN-C_3_egtea_action_CE_s3_flow_model_best_fcfull_hd`.
+ 
+The first two databases had been included **by mistake and should be ignored**, instead, the remaining six databases should be used for the experiments when the standard evaluation protocol based on three splits is adopted. The following paragraph explains in detail how they have been created:
+ * `TSN-C_3_egtea_action_CE_s1_rgb_model_best_fcfull_hd`: features extracted using an RGB TSN model training using s2 and s3 as training set;
+ * `TSN-C_3_egtea_action_CE_s1_flow_model_best_fcfull_hd`: features extracted using a Flow TSN model training using s2 and s3 as training set; 
+ * `TSN-C_3_egtea_action_CE_s2_rgb_model_best_fcfull_hd`: features extracted using an RGB TSN model training using s1 and s3 as training set;
+ * `TSN-C_3_egtea_action_CE_s2_flow_model_best_fcfull_hd`: features extracted using a Flow TSN model training using s1 and s3 as training set;
+ * `TSN-C_3_egtea_action_CE_s3_rgb_model_best_fcfull_hd`: features extracted using an RGB TSN model training using s1 and s2 as training set;
+ * `TSN-C_3_egtea_action_CE_s3_flow_model_best_fcfull_hd`: features extracted using a Flow TSN model training using s1 and s2 as training set.
+
+An updated version of the zip file including only the correct databases is available at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). 
 
 ## Related Works
  * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf);
