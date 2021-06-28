@@ -27,7 +27,8 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
- * **11/01/2020** We have updated the archive providing the EGTEA Gaze+ pre-extracted features. Please see this README (below) for more information;
+ * **28/06/2021** We are now providing object detections on all frames of EPIC-KITCHENS-100. Please see this README (below) for more information;
+ * **11/01/2021** We have updated the archive providing the EGTEA Gaze+ pre-extracted features. Please see this README (below) for more information;
  * **01/10/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
  * **04/05/2020** We have now published an extended version of this work on PAMI. Please check the text above for the updated references;
  * **23/03/2020** We are now providing pre-extracted features for EGTEA Gaze+. See README for more information;
@@ -264,6 +265,43 @@ The first two databases had been included **by mistake and should be ignored**, 
  * `TSN-C_3_egtea_action_CE_s3_flow_model_best_fcfull_hd`: features extracted using a Flow TSN model training using s1 and s2 as training set.
 
 An updated version of the zip file including only the correct databases is available at [https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip](https://iplab.dmi.unict.it/sharing/rulstm/features/egtea.zip). 
+
+## Object detections on EPIC-KITCHENS-100
+We provide object detections obtained on each frame of EPIC-KITCHENS-100. The detections have been obtained by running the Faster RCNN model trained on EPIC-KITCHENS-55 described above and included in this repository. You can download a zip file containing all detections through this link: [https://iplab.dmi.unict.it/sharing/rulstm/detected_objects.zip](https://iplab.dmi.unict.it/sharing/rulstm/detected_objects.zip).
+
+**Note** These detections are a superset of the ones used for the original experiments on EPIC-KITCHENS-55. If you are experimenting with EK-55, you can just discard the extra videos not belonging to EK-55.
+
+The zip file contains a `npy` file for each video in EPIC-KITCHENS-100. For examle:
+
+```
+P01_01.MP4_detections.npy
+P01_02.MP4_detections.npy
+P01_03.MP4_detections.npy
+P01_04.MP4_detections.npy
+P01_05.MP4_detections.npy
+P01_06.MP4_detections.npy
+...
+```
+
+Each file contains all object detections obtained in the video referenced in the filename. You can load these `npy` files as in this example code:
+
+```python
+import numpy as np
+data=np.load('P04_101.MP4_detections.npy', allow_pickle=True, encoding='latin1')
+```
+
+`data` will be a 1-dimensional numpy ndarray containing `n` entries, where `n` is the number of frames in the video. The `n-th` entry of the dataframe will be an array of shape `m \times 6` where, `m` is the number of objects detected in the frame. The six columns contain respectively:
+ * The class id. Please note that the background class is specified as `0`, so it is necessary to subtract `1` in order to match the noun class IDs reported in https://github.com/epic-kitchens/epic-kitchens-55-annotations/blob/master/EPIC_noun_classes.csv;
+ * The `x1`, `y1`, `x2`, `y2` bounding box coordinates;
+ * The detection confidence score.
+
+The following example code separates class ids, box coordinates and confidence scores:
+
+```python
+object_classes = data[:,0]-1
+object_boxes = data[:,1:5]
+detection_scores = data[:,-1]
+```
 
 ## Related Works
  * A. Furnari, S. Battiato, K. Grauman, G. M. Farinella, Next-Active-Object Prediction from Egocentric Videos, Journal of Visual Communication and Image Representation, 2017. [Download](https://arxiv.org/pdf/1904.05250.pdf);
