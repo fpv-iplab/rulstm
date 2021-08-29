@@ -11,7 +11,12 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import json
+import os
+import warnings
 pd.options.display.float_format = '{:05.2f}'.format
+# set for unflatten lstm, or you can add flattern_parameters() in models.py which is memory saving.
+warnings.filterwarnings("ignore")
+
 
 parser = ArgumentParser(description="Training program for RULSTM")
 parser.add_argument('mode', type=str, choices=['train', 'validate', 'test', 'test', 'validate_json'], default='train',
@@ -78,12 +83,21 @@ parser.add_argument('--ek100', action='store_true',
 
 parser.add_argument('--json_directory', type=str, default = None, help = 'Directory in which to save the generated jsons.')
 
+parser.add_argument('--available_gpu', type=str, default='-1',
+                help='\'cpu\', or \'0\' for 1 availabel gpu\'s number, or \'0,1,5\' for more')
 args = parser.parse_args()
 
 if args.mode == 'test' or args.mode=='validate_json':
     assert args.json_directory is not None
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+if args.available_gpu == -1:
+    device = 'cuda'
+elif torch.cuda.is_available():
+    device = 'cpu'
+else:
+    raise Exception('Your gpu is not available.')
+os.environ['CUDA_VISIBLE_DEVICES'] = args.available_gpu
+
 
 if args.task == 'anticipation':
     exp_name = f"RULSTM-{args.task}_{args.alpha}_{args.S_enc}_{args.S_ant}_{args.modality}"
@@ -161,10 +175,14 @@ def get_model():
             obj_model.load_state_dict(checkpoint_obj)
         
         if args.task == 'early_recognition':
-            return [rgb_model, flow_model, obj_model]
+            return [rgb_model.to(device), flow_model.to(device), obj_model.to(device)]
 
         model = RULSTMFusion([rgb_model, flow_model, obj_model], args.hidden, args.dropout)
 
+    model.to(device)
+    # len(single gpu)==1, len('-1')==2 for cpu, and len(multi gpu) is at least 3
+    if len(os.environ['CUDA_VISIBLE_DEVICES']) > 2:
+        model = torch.nn.DataParallel(model)
     return model
 
 
@@ -236,17 +254,15 @@ def get_scores(model, loader, challenge=False, include_discarded = False):
     labels = []
     ids = []
     with torch.set_grad_enabled(False):
-        for batch in tqdm(loader, 'Evaluating...', len(loader)):
-            x = batch['past_features' if args.task ==
-                      'anticipation' else 'action_features']
+        for i, x, y in tqdm(loader, 'Evaluating...', len(loader)):
             if type(x) == list:
                 x = [xx.to(device) for xx in x]
             else:
                 x = x.to(device)
 
-            y = batch['label'].numpy()
+            y = y.numpy()
 
-            ids.append(batch['id'])
+            ids.append(i)
 
             preds = model(x).cpu().numpy()[:, -args.S_ant:, :]
 
@@ -305,15 +321,14 @@ def trainval(model, loaders, optimizer, epochs, start_epoch, start_best_perf):
                     model.eval()
 
                 for i, batch in enumerate(loaders[mode]):
-                    x = batch['past_features' if args.task ==
-                              'anticipation' else 'action_features']
+                    _, x, y = batch
 
                     if type(x) == list:
                         x = [xx.to(device) for xx in x]
                     else:
                         x = x.to(device)
 
-                    y = batch['label'].to(device)
+                    y = y.to(device)
 
                     bs = y.shape[0]  # batch size
 
@@ -411,10 +426,6 @@ def get_many_shot():
 
 def main():
     model = get_model()
-    if type(model) == list:
-        model = [m.to(device) for m in model]
-    else:
-        model.to(device)
 
     if args.mode == 'train':
         loaders = {m: get_loader(m) for m in ['training', 'validation']}
