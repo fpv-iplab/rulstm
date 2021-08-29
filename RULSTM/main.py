@@ -91,9 +91,9 @@ if args.mode == 'test' or args.mode=='validate_json':
     assert args.json_directory is not None
 
 if args.available_gpu == -1:
-    device = 'cuda'
-elif torch.cuda.is_available():
     device = 'cpu'
+elif torch.cuda.is_available():
+    device = 'cuda'
 else:
     raise Exception('Your gpu is not available.')
 os.environ['CUDA_VISIBLE_DEVICES'] = args.available_gpu
