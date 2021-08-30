@@ -60,6 +60,9 @@ parser.add_argument('--feat_in', type=int, default=1024,
 parser.add_argument('--feats_in', type=int, nargs='+', default=[1024, 1024, 352],
                     help='Input sizes when the fusion modality is selected.')
 parser.add_argument('--dropout', type=float, default=0.8, help="Dropout rate")
+parser.add_argument('--preload_features', action='store_true',
+                    help="Whether to preload features")
+
 
 parser.add_argument('--batch_size', type=int, default=128, help="Batch Size")
 parser.add_argument('--num_workers', type=int, default=4,
@@ -138,7 +141,8 @@ def get_loader(mode, override_modality = None):
         'past_features': args.task == 'anticipation',
         'sequence_length': args.S_enc + args.S_ant,
         'label_type': ['verb', 'noun', 'action'] if args.mode != 'train' else 'action',
-        'challenge': 'test' in mode
+        'challenge': 'test' in mode,
+        'preload': args.preload_features
     }
 
     _set = SequenceDataset(**kargs)
