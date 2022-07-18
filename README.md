@@ -83,6 +83,17 @@ We provide CSVs for training/validation/and testing on EPIC-KITCHENS-55 in the `
  * `validation_videos.csv`: contains the list of validation videos in our training/validation split;
 We also provide CSVs for training/validation/testing on EPIC-KITCHENS-100 in the `data/ek100` directory. 
 
+Training and validation CSVs report the following columns:
+ * Annotation ID;
+ * Video name (without extension);
+ * Start frame;
+ * End frame;
+ * Verb ID;
+ * Noun ID;
+ * Action ID.
+ 
+The test CSVs do not report the last three columns since test annotations are not public. These CSVs are provided to allow producing predicitons in JSON format to be submitted to the leaderboard.
+
 Please note that time-stamps are reported in terms of frame numbers in the csvs. This has been done by assuming a fixed framerate of 30fps. Since the original videos have been collected a different framerates, we first converted all videos to 30fps using ffmpeg.
 
 We provide pre-extracted features. The features are stored in LMDB datasets. To download them, run the following commands:
