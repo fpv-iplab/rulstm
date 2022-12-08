@@ -1,4 +1,4 @@
-certifi==2019.6.16
+certifi==2022.12.7
 cffi==1.12.3
 lmdb==0.96
 mkl-fft==1.0.12
