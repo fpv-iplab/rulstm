@@ -1,4 +1,6 @@
 # What Would You Expect? Anticipating Egocentric Actions with Rolling-Unrolling LSTMs and Modality Attention
+See the quickstart here 👉 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fpv-iplab/rulstm/blob/master/RULSTM/Rolling-Unrolling-LSTM-Quickstart.ipynb)
+
 This repository hosts the code related to the following papers:
 
 Antonino Furnari and Giovanni Maria Farinella, Rolling-Unrolling LSTMs for Action Anticipation from First-Person Video. IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI). 2020. [Download](http://arxiv.org/pdf/2005.02190.pdf)
@@ -27,6 +29,7 @@ If you use the code/models hosted in this repository, please cite the following 
 }
 ```
 ## Updates:
+ * **23/08/2023** A quickstart notebook is available [here](RULSTM/Rolling-Unrolling-LSTM-Quickstart.ipynb). You can also open it directly in Colab clicking on the badge: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fpv-iplab/rulstm/blob/master/RULSTM/Rolling-Unrolling-LSTM-Quickstart.ipynb)
  * **28/06/2021** We are now providing object detections on all frames of EPIC-KITCHENS-100. Please see this README (below) for more information;
  * **11/01/2021** We have updated the archive providing the EGTEA Gaze+ pre-extracted features. Please see this README (below) for more information;
  * **01/10/2020** We are now sharing the rgb/flow/obj EPIC-KITCHENS-100 features and pre-trained models used to report baseline results in the [Rescaling Egocentric Vision](https://arxiv.org/abs/2006.13256) paper;
