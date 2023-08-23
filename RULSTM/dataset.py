@@ -1,6 +1,10 @@
 """ Implements a dataset object which allows to read representations from LMDB datasets in a multi-modal fashion
 The dataset can sample frames for both the anticipation and early recognition tasks."""
 
+# Modification:
+# 1.Add an option of preloading features
+# 2.Change the logic about return of dataset, which is equivalent to the original
+#   yet less judgement and pack-unpack things.
 import numpy as np
 import lmdb
 from tqdm import tqdm
@@ -48,7 +52,8 @@ class SequenceDataset(data.Dataset):
                 transform = None,
                 challenge = False,
                 past_features = True,
-                action_samples = None):
+                action_samples = None,
+                preload = False):
         """
             Inputs:
                 path_to_lmdb: path to the folder containing the LMDB dataset
@@ -81,18 +86,15 @@ class SequenceDataset(data.Dataset):
         self.label_type = label_type
         self.sequence_length = sequence_length
         self.img_tmpl = img_tmpl
-        self.action_samples = action_samples
+        self.preload = preload
         
         # initialize some lists
         self.ids = [] # action ids
         self.discarded_ids = [] # list of ids discarded (e.g., if there were no enough frames before the beginning of the action
         self.discarded_labels = [] # list of labels discarded (e.g., if there were no enough frames before the beginning of the action
-        self.past_frames = [] # names of frames sampled before each action
-        self.action_frames = [] # names of frames sampled from each action
+        self.fts = [] # features of frames sampled, varies in sample mode
+        self.frames = [] # keep the names of frames of each sample, EMPTY if preload.
         self.labels = [] # labels of each action
-        
-        # populate them
-        self.__populate_lists()
 
         # if a list to datasets has been provided, load all of them
         if isinstance(self.path_to_lmdb, list):
@@ -100,6 +102,9 @@ class SequenceDataset(data.Dataset):
         else:
             # otherwise, just load the single LMDB dataset
             self.env = lmdb.open(self.path_to_lmdb, readonly=True, lock=False)
+
+        # populate them
+        self.__populate_lists()
 
     def __get_frames(self, frames, video):
         """ format file names using the image template """
@@ -109,18 +114,21 @@ class SequenceDataset(data.Dataset):
     def __populate_lists(self):
         """ Samples a sequence for each action and populates the lists. """
         for _, a in tqdm(self.annotations.iterrows(), 'Populating Dataset', total = len(self.annotations)):
-
-            # sample frames before the beginning of the action
-            frames = self.__sample_frames_past(a.start)
-
             if self.action_samples:
                 # sample frames from the action
                 # to sample n frames, we first sample n+1 frames with linspace, then discard the first one
-                action_frames = np.linspace(a.start, a.end, self.action_samples+1, dtype=int)[1:]
+                frames = np.linspace(a.start, a.end, self.action_samples+1, dtype=int)[1:]
+            else:
+                # sample frames before the beginning of the action
+                frames = self.__sample_frames_past(a.start)
 
             # check if there were enough frames before the beginning of the action
             if frames.min()>=1: #if the smaller frame is at least 1, the sequence is valid
-                self.past_frames.append(self.__get_frames(frames, a.video))
+                frames = self.__get_frames(frames, a.video)
+                if self.preload:
+                    self.fts.append(read_data(frames, self.env, self.transform))
+                else:
+                    self.frames.append(frames)
                 self.ids.append(a.name)
                 # handle whether a list of labels is required (e.g., [verb, noun]), rather than a single action
                 if isinstance(self.label_type, list):
@@ -134,8 +142,6 @@ class SequenceDataset(data.Dataset):
                         self.labels.append(-1)
                     else:
                         self.labels.append(a[self.label_type])
-                if self.action_samples:
-                    self.action_frames.append(self.__get_frames(action_frames, a.video))
             else:
                 #if the sequence is invalid, do nothing, but add the id to the discarded_ids list
                 self.discarded_ids.append(a.name)
@@ -182,29 +188,8 @@ class SequenceDataset(data.Dataset):
         return len(self.ids)
 
     def __getitem__(self, index):
-        """ sample a given sequence """
-        # get past frames
-        past_frames = self.past_frames[index]
-
-        if self.action_samples:
-            # get action frames
-            action_frames = self.action_frames[index]
-
-        # return a dictionary containing the id of the current sequence
-        # this is useful to produce the jsons for the challenge
-        out = {'id':self.ids[index]}
-
-        if self.past_features:
-            # read representations for past frames
-            out['past_features'] = read_data(past_frames, self.env, self.transform)
-
-        # get the label of the current sequence
-        label = self.labels[index]
-        out['label'] = label
-
-        if self.action_samples:
-            # read representations for the action samples
-            out['action_features'] = read_data(action_frames, self.env, self.transform)
-
-        return out
-
+        if self.preload:
+            fts = self.fts[index]
+        else:
+            fts = read_data(self.frames[index], self.env, self.transform)
+        return self.ids[index], fts, self.labels[index]
