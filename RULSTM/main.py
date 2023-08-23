@@ -150,11 +150,11 @@ def get_model():
 
         if args.task=='early_recognition' or (args.mode == 'train' and not args.ignore_checkpoints):
             checkpoint_rgb = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','rgb') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','rgb') +'_best.pth.tar'), map_location='cpu')['state_dict']
             checkpoint_flow = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','flow') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','flow') +'_best.pth.tar'), map_location='cpu')['state_dict']
             checkpoint_obj = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','obj') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','obj') +'_best.pth.tar'), map_location='cpu')['state_dict']
 
             rgb_model.load_state_dict(checkpoint_rgb)
             flow_model.load_state_dict(checkpoint_flow)
@@ -170,9 +170,9 @@ def get_model():
 
 def load_checkpoint(model, best=False):
     if best:
-        chk = torch.load(join(args.path_to_models, exp_name + '_best.pth.tar'))
+        chk = torch.load(join(args.path_to_models, exp_name + '_best.pth.tar'), map_location='cpu')
     else:
-        chk = torch.load(join(args.path_to_models, exp_name + '.pth.tar'))
+        chk = torch.load(join(args.path_to_models, exp_name + '.pth.tar'), map_location='cpu')
 
     epoch = chk['epoch']
     best_perf = chk['best_perf']
