@@ -11,6 +11,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import json
+pd.set_option('display.max_columns', None) # to show all columns in the table below
 pd.options.display.float_format = '{:05.2f}'.format
 
 parser = ArgumentParser(description="Training program for RULSTM")
