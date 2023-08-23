@@ -158,7 +158,7 @@ def get_model():
         # and inf the flag --ignore_checkpoints has not been specified
         if args.mode == 'train' and not args.ignore_checkpoints and not args.sequence_completion:
             checkpoint = torch.load(join(
-                args.path_to_models, exp_name + '_sequence_completion_best.pth.tar'))['state_dict']
+                args.path_to_models, exp_name + '_sequence_completion_best.pth.tar'),map_location='cpu')['state_dict']
             model.load_state_dict(checkpoint)
     else:
         rgb_model = RULSTM(args.num_class, args.feats_in[0], args.hidden, args.dropout, return_context = args.task=='anticipation')
@@ -168,11 +168,11 @@ def get_model():
 
         if args.task=='early_recognition' or (args.mode == 'train' and not args.ignore_checkpoints):
             checkpoint_rgb = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','rgb') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','rgb') +'_best.pth.tar'),map_location='cuda:0')['state_dict']
             checkpoint_flow = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','flow') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','flow') +'_best.pth.tar'),map_location='cuda:0')['state_dict']
             checkpoint_obj = torch.load(join(args.path_to_models,\
-                    exp_name.replace('fusion','obj') +'_best.pth.tar'))['state_dict']
+                    exp_name.replace('fusion','obj') +'_best.pth.tar'),map_location='cuda:0')['state_dict']
 
             rgb_model.load_state_dict(checkpoint_rgb)
             flow_model.load_state_dict(checkpoint_flow)
@@ -192,9 +192,9 @@ def get_model():
 
 def load_checkpoint(model, best=False):
     if best:
-        chk = torch.load(join(args.path_to_models, exp_name + '_best.pth.tar'))
+        chk = torch.load(join(args.path_to_models, exp_name + '_best.pth.tar'),map_location='cuda:0')
     else:
-        chk = torch.load(join(args.path_to_models, exp_name + '.pth.tar'))
+        chk = torch.load(join(args.path_to_models, exp_name + '.pth.tar'),map_location='cuda:0')
 
     epoch = chk['epoch']
     best_perf = chk['best_perf']
